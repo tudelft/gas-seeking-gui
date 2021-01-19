@@ -24,8 +24,8 @@ line = plot.plot([0.0],[0.0])
 
 def update_plot_data():
     if pe.is_connected:
-        x_arr.append(pe.x)
-        y_arr.append(pe.y)
+        x_arr.append(-pe.y)
+        y_arr.append(pe.x)
 
         line.setData(x_arr,y_arr)
 def connect_drone():
@@ -46,7 +46,7 @@ def set_goal(mouseClickEvent):
     pos = mouseClickEvent.pos()
     x = plot.plotItem.vb.mapSceneToView(pos).x()
     y = plot.plotItem.vb.mapSceneToView(pos).y()
-    print([x,y])
+    pe._force_wp([y,-x])
 
 plot.scene().sigMouseClicked.connect(set_goal)
 
@@ -65,7 +65,6 @@ listw = QtGui.QListWidget()
 # data = np.random.normal(size=(2, n))
 # pos = [{'pos': data[:, i]} for i in range(n)]
 # scatter.setData(pos)
-
 
 take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)

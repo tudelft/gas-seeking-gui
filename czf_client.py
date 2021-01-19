@@ -46,6 +46,11 @@ class ParamExample:
     def _land(self):
         self._cf.param.set_value('relative_ctrl.keepFlying', '0')
 
+    def _force_wp(self,goal):
+        self._cf.param.set_value('relative_ctrl.force_wp', '1')
+        self._cf.param.set_value('relative_ctrl.forced_wp_x', str(goal[0]))
+        self._cf.param.set_value('relative_ctrl.forced_wp_y', str(goal[1]))
+
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
