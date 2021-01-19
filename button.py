@@ -2,6 +2,7 @@ from PyQt5 import QtGui  # (the example applies equally well to PySide2)
 from czf_client import *
 import pyqtgraph as pg
 import numpy as np
+from cflib.crazyflie.log import LogConfig
 
 goal = [0,0] # goal wp, starts at origin
 n = 5

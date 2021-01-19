@@ -4,6 +4,7 @@ import time
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
+from cflib.crazyflie.log import LogConfig
 
 import sys
 
@@ -48,22 +49,25 @@ class ParamExample:
         has been connected and the TOCs have been downloaded."""
         print('Connected to %s' % link_uri)
         self.is_connected = True
-        # if (self.is_connected == True):
-        #     self._cf.param.set_value('relative_ctrl.keepFlying', '1')
-        # self._cf.param.add_update_callback(group='relative_ctrl', name='keepFlying', cb=self._a_pitch_kd_callback)
-        # self._cf.param.set_value('relative_ctrl.keepFlying', '1')
+        # The definition of the logconfig can be made before connecting
+        self._lg_stab = LogConfig(name='State', period_in_ms=10)
+        self._lg_stab.add_variable('kalman.stateX', 'float')
+        self._lg_stab.add_variable('kalman.stateY', 'float')
 
-        # self._cf.param.add_update_callback(group='relative_ctrl',
-        #                                     name='keepFlying',
-        #                                     cb=self._a_pitch_kd_callback)
-        # if int(sys.argv[1]):
-        # self._cf.param.set_value('relative_ctrl.keepFlying', '1')
-            # print('Start flights')
-        # else:
-        #     self._cf.param.set_value('relative_ctrl.keepFlying', '0')
-        #     print('stop flights')
-
-        print('')
+        # Adding the configuration cannot be done until a Crazyflie is
+        # connected, since we need to check that the variables we
+        # would like to log are in the TOC.
+        self._cf.log.add_config(self._lg_stab)
+        # This callback will receive the data
+        self._lg_stab.data_received_cb.add_callback(self._stab_log_data)
+        # This callback will be called on errors
+        # self._lg_stab.error_cb.add_callback(self._stab_log_error)
+        # Start the logging
+        self._lg_stab.start()       
+    
+    def _stab_log_data(self, timestamp, data, logconf):
+        """Callback from a the log API when data arrives"""
+        print('[%d][%s]: %s' % (timestamp, logconf.name, data))
 
     def _a_pitch_kd_callback(self, name, value):
         """Callback for pid_attitude.pitch_kd"""
