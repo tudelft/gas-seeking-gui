@@ -1,126 +1,120 @@
+from PyQt5 import QtGui,QtCore  # (the example applies equally well to PySide2)
+from czf_client import *
+import pyqtgraph as pg
+import numpy as np
+from cflib.crazyflie.log import LogConfig
 
-# importing Qt widgets 
-from PyQt5.QtWidgets import *
-  
-# importing system 
-import sys 
-  
-# importing numpy as np 
-import numpy as np 
-  
-# importing pyqtgraph as pg 
-import pyqtgraph as pg 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import pyqtSlot
-clicks = []
-class Window(QMainWindow): 
-  
-    def __init__(self): 
-        super().__init__() 
-  
-        # setting title 
-        self.setWindowTitle("PyQtGraph") 
-  
-        # setting geometry 
-        self.setGeometry(100, 100, 600, 500) 
-  
-        # icon 
-        icon = QIcon("skin.png") 
-  
-        # setting icon to the window 
-        self.setWindowIcon(icon) 
-  
-        # calling method 
-        self.UiComponents() 
-  
-        # showing all the widgets 
-        self.initUI()
-  
-    # method for components 
-    def UiComponents(self): 
-  
-        # creating a widget object 
-        widget = QWidget() 
-  
-        # creating a label 
-        label = QLabel("Geeksforgeeks Scatter Plot") 
-  
-        # making label do word wrap 
-        label.setWordWrap(True) 
-  
-        # creating a plot window 
-        plot = pg.plot() 
-  
-        # number of points 
-        n = 300
-  
-        # creating a scatter plot item 
-        # of size = 10 
-        # using brush to enlarge the of white color with transparency is 50% 
-        scatter = pg.ScatterPlotItem( 
-            size=10, brush=pg.mkBrush(255, 255, 255, 120)) 
-  
-        plot.scene().sigMouseClicked.connect(self.onClick)
-        # getting random position 
-        pos = np.random.normal(size=(2, n), scale=1e-5) 
-        # creating spots using the random position 
-        spots = [{'pos': pos[:, i], 'data': 1} 
-                 for i in range(n)] + [{'pos': [0, 0], 'data': 1}] 
-  
-        # adding points to the scatter plot 
-        scatter.addPoints(spots) 
-  
-        # add item to plot window 
-        # adding scatter plot item to the plot window 
-        plot.addItem(scatter) 
-  
-        # Creating a grid layout 
-        layout = QGridLayout() 
-  
-        # minimum width value of the label 
-        label.setMinimumWidth(130) 
-  
-        # setting this layout to the widget 
-        widget.setLayout(layout) 
-  
-        # adding label in the layout 
-        layout.addWidget(label, 1, 0) 
-  
-        # plot window goes on right side, spanning 3 rows 
-        layout.addWidget(plot, 0, 1, 3, 1) 
-  
-        # setting this widget as central widget of the main widow 
-        self.setCentralWidget(widget) 
-      
-    def initUI(self):
-        # self.setWindowTitle(self.title)
-        # self.setGeometry(self.left, self.top, self.width, self.height)
+goal = [0,0] # goal wp, starts at origin
+n = 5
+cflib.crtp.init_drivers(enable_debug_driver=False)
+pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
+goal_mouse = [0,0]
+
+x_arr = []
+y_arr = []
+
+x_scatter = []
+y_scatter = []
+    
+## Always start by initializing Qt (only once per application)
+app = QtGui.QApplication([])
+
+
+## Define a top-level widget to hold everything
+w = QtGui.QWidget()
+
+plot = pg.PlotWidget()
+line = plot.plot([0.0],[0.0])
+
+scatter = pg.ScatterPlotItem(pen=pg.mkPen(width=5, color='r'), symbol='o', size=1)
+plot.addItem(scatter)
+goal_text = pg.TextItem('goal_wp')
+arrow_1 = pg.ArrowItem(angle=90)
+agent_1_text = pg.TextItem('E5')
+
+def update_plot_data():
+    if pe.is_connected:
+        x_arr.append(-pe.y)
+        y_arr.append(pe.x)
+
+        line.setData(x_arr,y_arr)
+        x_scatter = [x_arr[-1]]
+        y_scatter = [y_arr[-1]]
+
+        plot.addItem(arrow_1)
+        plot.addItem(agent_1_text)
+
+        arrow_1.setPos(x_scatter[0],y_scatter[0])     
+        agent_1_text.setPos(x_scatter[0],y_scatter[0]) 
+
+        if (pe.forcing_wp):
+            x_scatter.append(goal_mouse[0])
+            y_scatter.append(goal_mouse[1])
+            goal_text.setPos(goal_mouse[0],goal_mouse[1])
+            plot.addItem(goal_text)
+        scatter.setData(x_scatter,y_scatter)
         
-        button = QPushButton('PyQt5 button', self)
-        button.setToolTip('This is an example button')
-        button.move(200,200)
-        button.clicked.connect(self.on_click)
-        self.show() 
-        # self.show()
 
-    @pyqtSlot()
-    def on_click(self):
-        print('PyQt5 button click')
-  
+def connect_drone():
+    global pe
+    pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
 
-    def onClick(ev):
-        global clicks
-        x = ev.pos().x()
-        y = ev.pos().y()
-        print(x,y)
+def take_off_func():
+    while not pe.is_connected:
+        time.sleep(0.1)
+    pe._take_off()
 
-# create pyqt5 app 
-App = QApplication(sys.argv) 
-  
-# create the instance of our Window 
-window = Window() 
+def land_func():
+    while not pe.is_connected:
+        time.sleep(0.1)
+    pe._land()
 
+def set_goal(mouseClickEvent):
+    global goal_mouse
+    pos = mouseClickEvent.pos()
+    x = plot.plotItem.vb.mapSceneToView(pos).x()
+    y = plot.plotItem.vb.mapSceneToView(pos).y()
+    pe._force_wp([y,-x])
+    goal_mouse = [x,y]
 
 
-# start the app 
-sys.exit(App.exec()) 
+plot.scene().sigMouseClicked.connect(set_goal)
+
+
+## Create some widgets to be placed inside
+connect = QtGui.QPushButton('Connect Drone')
+take_off = QtGui.QPushButton('Take off')
+land = QtGui.QPushButton('Land')
+led = QtGui.QPushButton('LED')
+
+listw = QtGui.QListWidget()
+
+
+take_off.clicked.connect(take_off_func)
+connect.clicked.connect(connect_drone)
+land.clicked.connect(land_func)
+# led.clicked.connect(czf_LED)
+
+## Create a grid layout to manage the widgets size and position
+layout = QtGui.QGridLayout()
+w.setLayout(layout)
+
+## Add timer
+timer = QtCore.QTimer()
+timer.setInterval(50)
+timer.timeout.connect(update_plot_data)
+timer.start()
+
+## Add widgets to the layout in their proper positions
+layout.addWidget(connect, 0, 0)   # button goes in upper-left
+layout.addWidget(take_off, 1, 0)   # button goes in upper-left
+layout.addWidget(land, 2, 0)   # text edit goes in middle-left
+layout.addWidget(led, 3, 0)   # text edit goes in middle-left
+layout.addWidget(listw, 4, 0)  # list widget goes in bottom-left
+layout.addWidget(plot, 0, 1, 5, 1)  # plot goes on right side, spanning 3 rows
+
+## Display the widget as a new window
+w.show()
+
+## Start the Qt event loop
+app.exec_()

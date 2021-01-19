@@ -8,9 +8,13 @@ goal = [0,0] # goal wp, starts at origin
 n = 5
 cflib.crtp.init_drivers(enable_debug_driver=False)
 pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
+goal_mouse = [0,0]
 
 x_arr = []
 y_arr = []
+
+x_scatter = []
+y_scatter = []
     
 ## Always start by initializing Qt (only once per application)
 app = QtGui.QApplication([])
@@ -22,12 +26,35 @@ w = QtGui.QWidget()
 plot = pg.PlotWidget()
 line = plot.plot([0.0],[0.0])
 
+scatter = pg.ScatterPlotItem(pen=pg.mkPen(width=5, color='r'), symbol='o', size=1)
+plot.addItem(scatter)
+goal_text = pg.TextItem('goal_wp')
+arrow_1 = pg.ArrowItem(angle=90)
+agent_1_text = pg.TextItem('E5')
+
 def update_plot_data():
     if pe.is_connected:
         x_arr.append(-pe.y)
         y_arr.append(pe.x)
 
         line.setData(x_arr,y_arr)
+        x_scatter = [x_arr[-1]]
+        y_scatter = [y_arr[-1]]
+
+        plot.addItem(arrow_1)
+        plot.addItem(agent_1_text)
+
+        arrow_1.setPos(x_scatter[0],y_scatter[0])     
+        agent_1_text.setPos(x_scatter[0],y_scatter[0]) 
+
+        if (pe.forcing_wp):
+            x_scatter.append(goal_mouse[0])
+            y_scatter.append(goal_mouse[1])
+            goal_text.setPos(goal_mouse[0],goal_mouse[1])
+            plot.addItem(goal_text)
+        scatter.setData(x_scatter,y_scatter)
+        
+
 def connect_drone():
     global pe
     pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
@@ -43,10 +70,13 @@ def land_func():
     pe._land()
 
 def set_goal(mouseClickEvent):
+    global goal_mouse
     pos = mouseClickEvent.pos()
     x = plot.plotItem.vb.mapSceneToView(pos).x()
     y = plot.plotItem.vb.mapSceneToView(pos).y()
     pe._force_wp([y,-x])
+    goal_mouse = [x,y]
+
 
 plot.scene().sigMouseClicked.connect(set_goal)
 
@@ -59,12 +89,6 @@ led = QtGui.QPushButton('LED')
 
 listw = QtGui.QListWidget()
 
-# scatter = pg.ScatterPlotItem(pen=pg.mkPen(width=5, color='r'), symbol='o', size=1)
-# plot.addItem(scatter)
-
-# data = np.random.normal(size=(2, n))
-# pos = [{'pos': data[:, i]} for i in range(n)]
-# scatter.setData(pos)
 
 take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)

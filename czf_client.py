@@ -19,6 +19,7 @@ class ParamExample:
         self.x = 0.0
         self.y = 0.0
         self._cf = Crazyflie(rw_cache='./cache')
+        self.forcing_wp = False
 
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -50,6 +51,11 @@ class ParamExample:
         self._cf.param.set_value('relative_ctrl.force_wp', '1')
         self._cf.param.set_value('relative_ctrl.forced_wp_x', str(goal[0]))
         self._cf.param.set_value('relative_ctrl.forced_wp_y', str(goal[1]))
+        self.forcing_wp = True
+    
+    def _release_wp(self):
+        self._cf.param.set_value('relative_ctrl.force_wp', '0')
+        self.forcing_wp = False
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
@@ -60,13 +66,23 @@ class ParamExample:
         self._lg_stab = LogConfig(name='State', period_in_ms=10)
         self._lg_stab.add_variable('kalman.stateX', 'float')
         self._lg_stab.add_variable('kalman.stateY', 'float')
+        self._lg_stab.add_variable('relative_pos.rlX1','float')
+        self._lg_stab.add_variable('relative_pos.rlY1','float')
+        self._lg_stab.add_variable('relative_pos.rlX2','float')
+        self._lg_stab.add_variable('relative_pos.rlY2','float')
 
+        self._lg_stab_2 = LogConfig(name='State_2', period_in_ms=10)
+        self._lg_stab_2.add_variable('relative_pos.rlYaw1','float')
+        self._lg_stab_2.add_variable('relative_pos.rlYaw2','float')
+        # self._lg_stab.add_variable('relative_pos.rlYaw2','float') 
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we
         # would like to log are in the TOC.
         self._cf.log.add_config(self._lg_stab)
+        self._cf.log.add_config(self._lg_stab_2)
         # This callback will receive the data
         self._lg_stab.data_received_cb.add_callback(self._stab_log_data)
+        self._lg_stab_2.data_received_cb.add_callback(self._stab_log_data_2)
         # This callback will be called on errors
         # self._lg_stab.error_cb.add_callback(self._stab_log_error)
         # Start the logging
@@ -76,6 +92,15 @@ class ParamExample:
         """Callback from a the log API when data arrives"""
         self.x = data['kalman.stateX']
         self.y = data['kalman.stateY']
+        self.x_1 = data['relative_pos.rlX1']
+        self.y_1 = data['relative_pos.rlY1']
+        self.x_2 = data['relative_pos.rlX2']
+        self.y_2 = data['relative_pos.rlY2']
+    
+    def _stab_log_data_2(self,timestamp,data,logconf):
+        self.yaw_1 = data['relative_pos.rlYaw1']
+        self.yaw_2 = data['relative_pos.rlYaw2']
+        
 
     def _a_pitch_kd_callback(self, name, value):
         """Callback for pid_attitude.pitch_kd"""
