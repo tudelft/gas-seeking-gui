@@ -1,4 +1,4 @@
-from PyQt5 import QtGui  # (the example applies equally well to PySide2)
+from PyQt5 import QtGui,QtCore  # (the example applies equally well to PySide2)
 from czf_client import *
 import pyqtgraph as pg
 import numpy as np
@@ -9,16 +9,25 @@ n = 5
 cflib.crtp.init_drivers(enable_debug_driver=False)
 pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
 
+x_arr = []
+y_arr = []
+    
 ## Always start by initializing Qt (only once per application)
 app = QtGui.QApplication([])
+
 
 ## Define a top-level widget to hold everything
 w = QtGui.QWidget()
 
 plot = pg.PlotWidget()
-plot.plot([1,2,3],[1,2,4])
+line = plot.plot([0.0],[0.0])
 
+def update_plot_data():
+    if pe.is_connected:
+        x_arr.append(pe.x)
+        y_arr.append(pe.y)
 
+        line.setData(x_arr,y_arr)
 def connect_drone():
     global pe
     pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
@@ -50,12 +59,12 @@ led = QtGui.QPushButton('LED')
 
 listw = QtGui.QListWidget()
 
-scatter = pg.ScatterPlotItem(pen=pg.mkPen(width=5, color='r'), symbol='o', size=1)
-plot.addItem(scatter)
+# scatter = pg.ScatterPlotItem(pen=pg.mkPen(width=5, color='r'), symbol='o', size=1)
+# plot.addItem(scatter)
 
-data = np.random.normal(size=(2, n))
-pos = [{'pos': data[:, i]} for i in range(n)]
-scatter.setData(pos)
+# data = np.random.normal(size=(2, n))
+# pos = [{'pos': data[:, i]} for i in range(n)]
+# scatter.setData(pos)
 
 
 take_off.clicked.connect(take_off_func)
@@ -66,6 +75,12 @@ land.clicked.connect(land_func)
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
 w.setLayout(layout)
+
+## Add timer
+timer = QtCore.QTimer()
+timer.setInterval(50)
+timer.timeout.connect(update_plot_data)
+timer.start()
 
 ## Add widgets to the layout in their proper positions
 layout.addWidget(connect, 0, 0)   # button goes in upper-left

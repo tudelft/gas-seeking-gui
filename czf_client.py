@@ -16,6 +16,8 @@ class ParamExample:
     def __init__(self, link_uri):
         """ Initialize and run the example with the specified link_uri """
 
+        self.x = 0.0
+        self.y = 0.0
         self._cf = Crazyflie(rw_cache='./cache')
 
         # Connect some callbacks from the Crazyflie API
@@ -67,7 +69,8 @@ class ParamExample:
     
     def _stab_log_data(self, timestamp, data, logconf):
         """Callback from a the log API when data arrives"""
-        print('[%d][%s]: %s' % (timestamp, logconf.name, data))
+        self.x = data['kalman.stateX']
+        self.y = data['kalman.stateY']
 
     def _a_pitch_kd_callback(self, name, value):
         """Callback for pid_attitude.pitch_kd"""
