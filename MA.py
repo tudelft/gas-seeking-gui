@@ -8,7 +8,10 @@ led_on = False
 goal = [0,0] # goal wp, starts at origin
 n = 5
 cflib.crtp.init_drivers(enable_debug_driver=False)
-pe = ParamExample('radio://0/60/2M/E7E7E7E7E6')
+pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
+pe_2 = ParamExample('radio://1/60/2M/E7E7E7E7E6')
+pe_3 = ParamExample('radio://2/70/2M/E7E7E7E7E7')
+
 goal_mouse = [0,0]
 
 x_arr = []
@@ -31,8 +34,15 @@ scatter = pg.ScatterPlotItem(pen=pg.mkPen(width=5, color='r'), symbol='o', size=
 plot.addItem(scatter)
 
 goal_text = pg.TextItem('goal_wp')
+
 arrow_1 = pg.ArrowItem(angle=90)
 agent_1_text = pg.TextItem('E5')
+
+arrow_2 = pg.ArrowItem(angle=90)
+agent_2_text = pg.TextItem('E6')
+
+arrow_3 = pg.ArrowItem(angle=90)
+agent_3_text = pg.TextItem('E7')
 
 def update_plot_data():
     if pe.is_connected:
@@ -45,9 +55,22 @@ def update_plot_data():
 
         plot.addItem(arrow_1)
         plot.addItem(agent_1_text)
+        plot.addItem(arrow_2)
+        plot.addItem(agent_2_text)
+        plot.addItem(arrow_3)
+        plot.addItem(agent_3_text)
 
         arrow_1.setPos(x_scatter[0],y_scatter[0])     
         agent_1_text.setPos(x_scatter[0],y_scatter[0]) 
+
+        arrow_2.setPos(x_scatter[0] - pe.y_1, y_scatter[0] + pe.x_1)
+        agent_2_text.setPos(x_scatter[0] - pe.y_1, y_scatter[0] + pe.x_1)
+
+        arrow_3.setPos(x_scatter[0] - pe.y_2, y_scatter[0] + pe.x_2)
+        agent_3_text.setPos(x_scatter[0] - pe.y_2, y_scatter[0] + pe.x_2)
+
+        arrow_2.setStyle(angle=90-(np.rad2deg(pe.yaw_1)))
+        arrow_2.setStyle(angle=90-(np.rad2deg(pe.yaw_2)))
 
         if (pe.forcing_wp):
             x_scatter.append(goal_mouse[0])
@@ -58,8 +81,10 @@ def update_plot_data():
         
 
 def connect_drone():
-    global pe
+    global pe,pe_2,pe_3
     pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
+    pe_2 = ParamExample('radio://0/60/2M/E7E7E7E7E6')
+    pe_3 = ParamExample('radio://0/70/2M/E7E7E7E7E7')
 
 def take_off_func():
     while not pe.is_connected:
@@ -79,11 +104,23 @@ def set_goal(mouseClickEvent):
     pe._force_wp([y,-x])
     goal_mouse = [x,y]
 
-def set_led(state):
+def set_led_1(state):
     if (state == 2 ):
         pe._flash_leds()
     else:
         pe._release_leds()
+
+def set_led_2(state):
+    if (state == 2 ):
+        pe_2._flash_leds()
+    else:
+        pe_2._release_leds()
+
+def set_led_3(state):
+    if (state == 2 ):
+        pe_3._flash_leds()
+    else:
+        pe_3._release_leds()
 
 
 plot.scene().sigMouseClicked.connect(set_goal)
@@ -93,16 +130,18 @@ plot.scene().sigMouseClicked.connect(set_goal)
 connect = QtGui.QPushButton('Connect Drone')
 take_off = QtGui.QPushButton('Take off')
 land = QtGui.QPushButton('Land')
-led = QtGui.QCheckBox('LED ')
-
-
+led_1 = QtGui.QCheckBox('LED 1')
+led_2 = QtGui.QCheckBox('LED 2')
+led_3 = QtGui.QCheckBox('LED 3')
 listw = QtGui.QListWidget()
-
 
 take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)
 land.clicked.connect(land_func)
-led.stateChanged.connect(set_led)
+
+led_1.stateChanged.connect(set_led_1)
+led_2.stateChanged.connect(set_led_2)
+led_3.stateChanged.connect(set_led_3)
 
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
@@ -118,9 +157,11 @@ timer.start()
 layout.addWidget(connect, 0, 0)   # button goes in upper-left
 layout.addWidget(take_off, 1, 0)   # button goes in upper-left
 layout.addWidget(land, 2, 0)   # text edit goes in middle-left
-layout.addWidget(led, 3, 0)   # text edit goes in middle-left
-layout.addWidget(listw, 4, 0)  # list widget goes in bottom-left
-layout.addWidget(plot, 0, 1, 5, 1)  # plot goes on right side, spanning 3 rows
+layout.addWidget(led_1, 3, 0)   # text edit goes in middle-left
+layout.addWidget(led_2, 4, 0)   # text edit goes in middle-left
+layout.addWidget(led_3, 5, 0)   # text edit goes in middle-left
+layout.addWidget(listw, 6, 0)  # list widget goes in bottom-left
+layout.addWidget(plot, 0, 1, 7, 1)  # plot goes on right side, spanning 3 rows
 
 ## Display the widget as a new window
 w.show()

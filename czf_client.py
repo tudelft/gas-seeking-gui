@@ -18,6 +18,14 @@ class ParamExample:
 
         self.x = 0.0
         self.y = 0.0
+
+        self.x_1 = 0.0
+        self.y_1 = 0.0
+        self.x_2 = 0.0
+        self.y_2 = 0.0
+        self.yaw_1 = 0.0
+        self.yaw_2 = 0.0
+
         self._cf = Crazyflie(rw_cache='./cache')
         self.forcing_wp = False
 
@@ -40,6 +48,7 @@ class ParamExample:
         self._param_groups = []
 
         random.seed()
+        time.sleep(4)
 
     def _take_off(self):
         self._cf.param.set_value('relative_ctrl.keepFlying', '1')
@@ -59,12 +68,15 @@ class ParamExample:
     
     def _release_leds(self):
         self._cf.param.set_value('led_f405.block_leds', '0')
+        time.sleep(0.1)
         self._cf.param.set_value('relative_ctrl.flash_leds', '0')
+        time.sleep(2)
     
     def _flash_leds(self):
         self._cf.param.set_value('led_f405.block_leds', '1')
+        time.sleep(0.1)
         self._cf.param.set_value('relative_ctrl.flash_leds', '1')
-
+        time.sleep(2)
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
@@ -83,6 +95,7 @@ class ParamExample:
         self._lg_stab_2 = LogConfig(name='State_2', period_in_ms=10)
         self._lg_stab_2.add_variable('relative_pos.rlYaw1','float')
         self._lg_stab_2.add_variable('relative_pos.rlYaw2','float')
+
         # self._lg_stab.add_variable('relative_pos.rlYaw2','float') 
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we
@@ -95,7 +108,8 @@ class ParamExample:
         # This callback will be called on errors
         # self._lg_stab.error_cb.add_callback(self._stab_log_error)
         # Start the logging
-        self._lg_stab.start()       
+        self._lg_stab.start()   
+        self._lg_stab_2.start()    
     
     def _stab_log_data(self, timestamp, data, logconf):
         """Callback from a the log API when data arrives"""
@@ -109,8 +123,6 @@ class ParamExample:
     def _stab_log_data_2(self,timestamp,data,logconf):
         self.yaw_1 = data['relative_pos.rlYaw1']
         self.yaw_2 = data['relative_pos.rlYaw2']
-        
-
     def _a_pitch_kd_callback(self, name, value):
         """Callback for pid_attitude.pitch_kd"""
         print('Readback: {0}={1}'.format(name, value))
