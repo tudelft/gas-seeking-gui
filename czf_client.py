@@ -56,6 +56,15 @@ class ParamExample:
     def _release_wp(self):
         self._cf.param.set_value('relative_ctrl.force_wp', '0')
         self.forcing_wp = False
+    
+    def _release_leds(self):
+        self._cf.param.set_value('led_f405.block_leds', '0')
+        self._cf.param.set_value('relative_ctrl.flash_leds', '0')
+    
+    def _flash_leds(self):
+        self._cf.param.set_value('led_f405.block_leds', '1')
+        self._cf.param.set_value('relative_ctrl.flash_leds', '1')
+
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie

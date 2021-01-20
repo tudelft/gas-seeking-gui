@@ -4,6 +4,7 @@ import pyqtgraph as pg
 import numpy as np
 from cflib.crazyflie.log import LogConfig
 
+led_on = False
 goal = [0,0] # goal wp, starts at origin
 n = 5
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -77,6 +78,15 @@ def set_goal(mouseClickEvent):
     pe._force_wp([y,-x])
     goal_mouse = [x,y]
 
+def set_led():
+    global led_on
+    if(led_on):
+        pe._release_leds()
+        led_on = False
+    else:
+        pe._flash_leds()
+        led_on = True
+
 
 plot.scene().sigMouseClicked.connect(set_goal)
 
@@ -93,7 +103,7 @@ listw = QtGui.QListWidget()
 take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)
 land.clicked.connect(land_func)
-# led.clicked.connect(czf_LED)
+led.clicked.connect(set_led)
 
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
