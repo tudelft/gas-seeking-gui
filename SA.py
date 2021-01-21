@@ -8,7 +8,7 @@ led_on = False
 goal = [0,0] # goal wp, starts at origin
 n = 5
 cflib.crtp.init_drivers(enable_debug_driver=False)
-pe = ParamExample('radio://0/60/2M/E7E7E7E7E6')
+pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
 goal_mouse = [0,0]
 
 x_arr = []
@@ -85,6 +85,11 @@ def set_led(state):
     else:
         pe._release_leds()
 
+def set_led_green(state):
+    if (state == 2 ):
+        pe.green_leds()
+    else:
+        pe._release_leds()
 
 plot.scene().sigMouseClicked.connect(set_goal)
 
@@ -93,7 +98,8 @@ plot.scene().sigMouseClicked.connect(set_goal)
 connect = QtGui.QPushButton('Connect Drone')
 take_off = QtGui.QPushButton('Take off')
 land = QtGui.QPushButton('Land')
-led = QtGui.QCheckBox('LED ')
+led = QtGui.QCheckBox('LED Flash ')
+led_green = QtGui.QCheckBox('LED Green ')
 
 
 listw = QtGui.QListWidget()
@@ -103,6 +109,7 @@ take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)
 land.clicked.connect(land_func)
 led.stateChanged.connect(set_led)
+led_green.stateChanged.connect(set_led_green)
 
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
@@ -119,8 +126,9 @@ layout.addWidget(connect, 0, 0)   # button goes in upper-left
 layout.addWidget(take_off, 1, 0)   # button goes in upper-left
 layout.addWidget(land, 2, 0)   # text edit goes in middle-left
 layout.addWidget(led, 3, 0)   # text edit goes in middle-left
-layout.addWidget(listw, 4, 0)  # list widget goes in bottom-left
-layout.addWidget(plot, 0, 1, 5, 1)  # plot goes on right side, spanning 3 rows
+layout.addWidget(led_green, 4, 0)   # text edit goes in middle-left
+layout.addWidget(listw, 5, 0)  # list widget goes in bottom-left
+layout.addWidget(plot, 0, 1, 6, 1)  # plot goes on right side, spanning 3 rows
 
 ## Display the widget as a new window
 w.show()

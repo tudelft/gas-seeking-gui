@@ -11,6 +11,8 @@ cflib.crtp.init_drivers(enable_debug_driver=False)
 pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
 pe_2 = ParamExample('radio://1/60/2M/E7E7E7E7E6')
 pe_3 = ParamExample('radio://2/70/2M/E7E7E7E7E7')
+dummy_1 = ParamExample('radio://3/80/2M/E7E7E7E7E8')
+dummy_2 = ParamExample('radio://4/90/2M/E7E7E7E7E9')
 
 goal_mouse = [0,0]
 
@@ -28,7 +30,7 @@ app = QtGui.QApplication([])
 w = QtGui.QWidget()
 
 plot = pg.PlotWidget()
-line = plot.plot([0.0],[0.0])
+# line = plot.plot([0.0],[0.0])
 
 scatter = pg.ScatterPlotItem(pen=pg.mkPen(width=5, color='r'), symbol='o', size=1)
 plot.addItem(scatter)
@@ -49,7 +51,7 @@ def update_plot_data():
         x_arr.append(-pe.y)
         y_arr.append(pe.x)
 
-        line.setData(x_arr,y_arr)
+        # line.setData(x_arr,y_arr)
         x_scatter = [x_arr[-1]]
         y_scatter = [y_arr[-1]]
 
@@ -122,6 +124,23 @@ def set_led_3(state):
     else:
         pe_3._release_leds()
 
+def set_led_1_green(state):
+    if (state == 2 ):
+        pe.green_leds()
+    else:
+        pe._release_leds()
+
+def set_led_2_green(state):
+    if (state == 2 ):
+        pe_2.green_leds()
+    else:
+        pe_2._release_leds()
+
+def set_led_3_green(state):
+    if (state == 2 ):
+        pe_3.green_leds()
+    else:
+        pe_3._release_leds()
 
 plot.scene().sigMouseClicked.connect(set_goal)
 
@@ -130,9 +149,13 @@ plot.scene().sigMouseClicked.connect(set_goal)
 connect = QtGui.QPushButton('Connect Drone')
 take_off = QtGui.QPushButton('Take off')
 land = QtGui.QPushButton('Land')
-led_1 = QtGui.QCheckBox('LED 1')
-led_2 = QtGui.QCheckBox('LED 2')
-led_3 = QtGui.QCheckBox('LED 3')
+led_1 = QtGui.QCheckBox('LED 1 flash')
+led_2 = QtGui.QCheckBox('LED 2 flash')
+led_3 = QtGui.QCheckBox('LED 3 flash')
+
+led_1_green = QtGui.QCheckBox('LED 1 green')
+led_2_green = QtGui.QCheckBox('LED 2 green')
+led_3_green = QtGui.QCheckBox('LED 3 green')
 listw = QtGui.QListWidget()
 
 take_off.clicked.connect(take_off_func)
@@ -142,6 +165,10 @@ land.clicked.connect(land_func)
 led_1.stateChanged.connect(set_led_1)
 led_2.stateChanged.connect(set_led_2)
 led_3.stateChanged.connect(set_led_3)
+
+led_1_green.stateChanged.connect(set_led_1_green)
+led_2_green.stateChanged.connect(set_led_2_green)
+led_3_green.stateChanged.connect(set_led_3_green)
 
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
@@ -160,8 +187,11 @@ layout.addWidget(land, 2, 0)   # text edit goes in middle-left
 layout.addWidget(led_1, 3, 0)   # text edit goes in middle-left
 layout.addWidget(led_2, 4, 0)   # text edit goes in middle-left
 layout.addWidget(led_3, 5, 0)   # text edit goes in middle-left
-layout.addWidget(listw, 6, 0)  # list widget goes in bottom-left
-layout.addWidget(plot, 0, 1, 7, 1)  # plot goes on right side, spanning 3 rows
+layout.addWidget(led_1_green, 6, 0)   # text edit goes in middle-left
+layout.addWidget(led_2_green, 7, 0)   # text edit goes in middle-left
+layout.addWidget(led_3_green, 8, 0)   # text edit goes in middle-left
+layout.addWidget(listw, 9, 0)  # list widget goes in bottom-left
+layout.addWidget(plot, 0, 1, 10, 1)  # plot goes on right side, spanning 3 rows
 
 ## Display the widget as a new window
 w.show()

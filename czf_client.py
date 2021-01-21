@@ -70,13 +70,18 @@ class ParamExample:
         self._cf.param.set_value('led_f405.block_leds', '0')
         time.sleep(0.1)
         self._cf.param.set_value('relative_ctrl.flash_leds', '0')
-        time.sleep(2)
-    
+        time.sleep(0.1)
+        self._cf.param.set_value('relative_ctrl.green_leds', '0')
+
     def _flash_leds(self):
         self._cf.param.set_value('led_f405.block_leds', '1')
         time.sleep(0.1)
         self._cf.param.set_value('relative_ctrl.flash_leds', '1')
-        time.sleep(2)
+
+    def green_leds(self):
+        self._cf.param.set_value('led_f405.block_leds', '1')
+        time.sleep(0.1)
+        self._cf.param.set_value('relative_ctrl.green_leds', '1')
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
