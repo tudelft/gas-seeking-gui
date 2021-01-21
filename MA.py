@@ -104,6 +104,10 @@ def set_goal(mouseClickEvent):
     x = plot.plotItem.vb.mapSceneToView(pos).x()
     y = plot.plotItem.vb.mapSceneToView(pos).y()
     pe._force_wp([y,-x])
+    pe_2._force_wp([y,-x])
+    pe_3._force_wp([y,-x])
+    dummy_1._force_wp([y,-x])
+    dummy_2._force_wp([y,-x])
     goal_mouse = [x,y]
 
 def set_led_1(state):
@@ -156,11 +160,13 @@ led_3 = QtGui.QCheckBox('LED 3 flash')
 led_1_green = QtGui.QCheckBox('LED 1 green')
 led_2_green = QtGui.QCheckBox('LED 2 green')
 led_3_green = QtGui.QCheckBox('LED 3 green')
+converge = QtGui.QPushButton('Converge 5')
 listw = QtGui.QListWidget()
 
 take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)
 land.clicked.connect(land_func)
+converge.clicked.connect(pe._converge)
 
 led_1.stateChanged.connect(set_led_1)
 led_2.stateChanged.connect(set_led_2)
@@ -190,8 +196,9 @@ layout.addWidget(led_3, 5, 0)   # text edit goes in middle-left
 layout.addWidget(led_1_green, 6, 0)   # text edit goes in middle-left
 layout.addWidget(led_2_green, 7, 0)   # text edit goes in middle-left
 layout.addWidget(led_3_green, 8, 0)   # text edit goes in middle-left
-layout.addWidget(listw, 9, 0)  # list widget goes in bottom-left
-layout.addWidget(plot, 0, 1, 10, 1)  # plot goes on right side, spanning 3 rows
+layout.addWidget(converge,9,0)
+layout.addWidget(listw, 10, 0)  # list widget goes in bottom-left
+layout.addWidget(plot, 0, 1, 11, 1)  # plot goes on right side, spanning 3 rows
 
 ## Display the widget as a new window
 w.show()

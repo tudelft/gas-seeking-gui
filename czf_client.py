@@ -52,9 +52,11 @@ class ParamExample:
 
     def _take_off(self):
         self._cf.param.set_value('relative_ctrl.keepFlying', '1')
-    
+        self._cf.param.set_value('relative_ctrl.force_land', '0')
+
     def _land(self):
         self._cf.param.set_value('relative_ctrl.keepFlying', '0')
+        self._cf.param.set_value('relative_ctrl.force_land', '1')
 
     def _force_wp(self,goal):
         self._cf.param.set_value('relative_ctrl.force_wp', '1')
@@ -62,6 +64,9 @@ class ParamExample:
         self._cf.param.set_value('relative_ctrl.forced_wp_y', str(goal[1]))
         self.forcing_wp = True
     
+    def _converge(self):
+        self._cf.param.set_value('relative_ctrl.converge', '1')
+
     def _release_wp(self):
         self._cf.param.set_value('relative_ctrl.force_wp', '0')
         self.forcing_wp = False
@@ -74,14 +79,17 @@ class ParamExample:
         self._cf.param.set_value('relative_ctrl.green_leds', '0')
 
     def _flash_leds(self):
+        self._release_leds()
         self._cf.param.set_value('led_f405.block_leds', '1')
         time.sleep(0.1)
         self._cf.param.set_value('relative_ctrl.flash_leds', '1')
 
     def green_leds(self):
+        self._release_leds()
         self._cf.param.set_value('led_f405.block_leds', '1')
         time.sleep(0.1)
         self._cf.param.set_value('relative_ctrl.green_leds', '1')
+    
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
