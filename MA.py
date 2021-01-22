@@ -5,14 +5,16 @@ import numpy as np
 from cflib.crazyflie.log import LogConfig
 
 led_on = False
+force_all_bool = False
 goal = [0,0] # goal wp, starts at origin
 n = 5
 cflib.crtp.init_drivers(enable_debug_driver=False)
 pe = ParamExample('radio://0/50/2M/E7E7E7E7E5')
 pe_2 = ParamExample('radio://1/60/2M/E7E7E7E7E6')
 pe_3 = ParamExample('radio://2/70/2M/E7E7E7E7E7')
-dummy_1 = ParamExample('radio://3/80/2M/E7E7E7E7E8')
-dummy_2 = ParamExample('radio://4/90/2M/E7E7E7E7E9')
+
+# dummy_1 = ParamExample('radio://3/80/2M/E7E7E7E7E0')
+# dummy_2 = ParamExample('radio://4/80/2M/E7E7E7E7E1')
 
 goal_mouse = [0,0]
 
@@ -88,6 +90,9 @@ def connect_drone():
     pe_2 = ParamExample('radio://0/60/2M/E7E7E7E7E6')
     pe_3 = ParamExample('radio://0/70/2M/E7E7E7E7E7')
 
+    # dummy_1 = ParamExample('radio://3/80/2M/E7E7E7E7E0')
+    # dummy_2 = ParamExample('radio://4/80/2M/E7E7E7E7E1')
+
 def take_off_func():
     while not pe.is_connected:
         time.sleep(0.1)
@@ -104,10 +109,13 @@ def set_goal(mouseClickEvent):
     x = plot.plotItem.vb.mapSceneToView(pos).x()
     y = plot.plotItem.vb.mapSceneToView(pos).y()
     pe._force_wp([y,-x])
-    pe_2._force_wp([y,-x])
-    pe_3._force_wp([y,-x])
-    dummy_1._force_wp([y,-x])
-    dummy_2._force_wp([y,-x])
+    
+    if (force_all_bool):
+        pe_2._force_wp([y,-x])
+        pe_3._force_wp([y,-x])
+
+    # dummy_1._force_wp([y,-x])
+    # dummy_2._force_wp([y,-x])
     goal_mouse = [x,y]
 
 def set_led_1(state):
@@ -146,8 +154,19 @@ def set_led_3_green(state):
     else:
         pe_3._release_leds()
 
-plot.scene().sigMouseClicked.connect(set_goal)
 
+def force_update(state):
+    global force_all_bool
+    if (state == 2 ):
+        force_all_bool = True
+    else:
+        force_all_bool = False
+
+def converge_all_to_e5():
+    pe_3._converge()
+    pe_2._converge()
+
+plot.scene().sigMouseClicked.connect(set_goal)
 
 ## Create some widgets to be placed inside
 connect = QtGui.QPushButton('Connect Drone')
@@ -156,6 +175,7 @@ land = QtGui.QPushButton('Land')
 led_1 = QtGui.QCheckBox('LED 1 flash')
 led_2 = QtGui.QCheckBox('LED 2 flash')
 led_3 = QtGui.QCheckBox('LED 3 flash')
+force_all = QtGui.QCheckBox('Force All')
 
 led_1_green = QtGui.QCheckBox('LED 1 green')
 led_2_green = QtGui.QCheckBox('LED 2 green')
@@ -166,7 +186,7 @@ listw = QtGui.QListWidget()
 take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)
 land.clicked.connect(land_func)
-converge.clicked.connect(pe._converge)
+converge.clicked.connect(converge_all_to_e5)
 
 led_1.stateChanged.connect(set_led_1)
 led_2.stateChanged.connect(set_led_2)
@@ -175,6 +195,7 @@ led_3.stateChanged.connect(set_led_3)
 led_1_green.stateChanged.connect(set_led_1_green)
 led_2_green.stateChanged.connect(set_led_2_green)
 led_3_green.stateChanged.connect(set_led_3_green)
+force_all.stateChanged.connect(force_update)
 
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
@@ -197,8 +218,9 @@ layout.addWidget(led_1_green, 6, 0)   # text edit goes in middle-left
 layout.addWidget(led_2_green, 7, 0)   # text edit goes in middle-left
 layout.addWidget(led_3_green, 8, 0)   # text edit goes in middle-left
 layout.addWidget(converge,9,0)
-layout.addWidget(listw, 10, 0)  # list widget goes in bottom-left
-layout.addWidget(plot, 0, 1, 11, 1)  # plot goes on right side, spanning 3 rows
+layout.addWidget(force_all,10,0)
+layout.addWidget(listw, 11, 0)  # list widget goes in bottom-left
+layout.addWidget(plot, 0, 1, 12, 1)  # plot goes on right side, spanning 3 rows
 
 ## Display the widget as a new window
 w.show()
