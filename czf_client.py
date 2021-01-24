@@ -66,6 +66,12 @@ class ParamExample:
     
     def _converge(self):
         self._cf.param.set_value('relative_ctrl.converge', '1')
+    
+    def _dummy_to(self):
+        self._cf.param.set_value('relative_ctrl.dummy_TO', '1')
+    
+    def dummy_land(self):
+        self._cf.param.set_value('relative_ctrl.dummy_TO', '0')
 
     def _release_wp(self):
         self._cf.param.set_value('relative_ctrl.force_wp', '0')
