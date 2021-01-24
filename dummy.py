@@ -18,7 +18,7 @@ goal = [0,0] # goal wp, starts at origin
 n = 5
 cflib.crtp.init_drivers(enable_debug_driver=False)
 dummy_1 = ParamExample('radio://0/80/2M/E7E7E7E7E0')
-dummy_2 = ParamExample('radio://0/80/2M/E7E7E7E7E1')
+dummy_2 = ParamExample('radio://1/80/2M/E7E7E7E7E1')
 
 if green_led:
     dummy_1.green_leds()
