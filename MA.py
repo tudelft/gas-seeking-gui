@@ -1,4 +1,4 @@
-from PyQt5 import QtGui,QtCore  # (the example applies equally well to PySide2)
+from PyQt5 import QtWidgets,QtCore  # (the example applies equally well to PySide2)
 from czf_client import *
 import pyqtgraph as pg
 import numpy as np
@@ -25,11 +25,11 @@ x_scatter = []
 y_scatter = []
     
 ## Always start by initializing Qt (only once per application)
-app = QtGui.QApplication([])
+app = QtWidgets.QApplication([])
 
 
 ## Define a top-level widget to hold everything
-w = QtGui.QWidget()
+w = QtWidgets.QWidget()
 
 plot = pg.PlotWidget()
 # line = plot.plot([0.0],[0.0])
@@ -189,19 +189,19 @@ def converge_all_to_e5():
 plot.scene().sigMouseClicked.connect(set_goal)
 
 ## Create some widgets to be placed inside
-connect = QtGui.QPushButton('Connect Drone')
-take_off = QtGui.QPushButton('Take off')
-land = QtGui.QPushButton('Land')
-led_1 = QtGui.QCheckBox('LED 1 flash')
-led_2 = QtGui.QCheckBox('LED 2 flash')
-led_3 = QtGui.QCheckBox('LED 3 flash')
-force_all = QtGui.QCheckBox('Force All')
+connect = QtWidgets.QPushButton('Connect Drone')
+take_off = QtWidgets.QPushButton('Take off')
+land = QtWidgets.QPushButton('Land')
+led_1 = QtWidgets.QCheckBox('LED 1 flash')
+led_2 = QtWidgets.QCheckBox('LED 2 flash')
+led_3 = QtWidgets.QCheckBox('LED 3 flash')
+force_all = QtWidgets.QCheckBox('Force All')
 
-led_1_green = QtGui.QCheckBox('LED 1 green')
-led_2_green = QtGui.QCheckBox('LED 2 green')
-led_3_green = QtGui.QCheckBox('LED 3 green')
-converge = QtGui.QPushButton('Converge 5')
-listw = QtGui.QListWidget()
+led_1_green = QtWidgets.QCheckBox('LED 1 green')
+led_2_green = QtWidgets.QCheckBox('LED 2 green')
+led_3_green = QtWidgets.QCheckBox('LED 3 green')
+converge = QtWidgets.QPushButton('Converge 5')
+listw = QtWidgets.QListWidget()
 
 take_off.clicked.connect(take_off_func)
 connect.clicked.connect(connect_drone)
@@ -218,7 +218,7 @@ led_3_green.stateChanged.connect(set_led_3_green)
 force_all.stateChanged.connect(force_update)
 
 ## Create a grid layout to manage the widgets size and position
-layout = QtGui.QGridLayout()
+layout = QtWidgets.QGridLayout()
 w.setLayout(layout)
 
 ## Add timer
