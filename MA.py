@@ -94,15 +94,34 @@ def connect_drone():
     # dummy_2 = ParamExample('radio://4/80/2M/E7E7E7E7E1')
 
 def take_off_func():
+    # pe._estimator_reset()
+    # pe_2._estimator_reset()
+    # pe_3._estimator_reset()
+    # time.sleep(0.5)
+
     while not pe.is_connected:
         time.sleep(0.1)
     pe._take_off()
 
 def land_func():
-    while not pe.is_connected:
-        time.sleep(0.1)
-    pe._land()
+    pe1_landed = False
+    pe2_landed = False
+    pe3_landed = False
+    while not (pe1_landed and pe2_landed and pe3_landed):
+        if pe.is_connected:
+            pe._land()
+            pe1_landed = True
 
+        if pe_2.is_connected:
+            pe_2._land()
+            pe2_landed = True
+
+        if pe_3.is_connected:
+            pe_3._land()
+            pe3_landed = True
+
+        time.sleep(0.1)
+        
 def set_goal(mouseClickEvent):
     global goal_mouse
     pos = mouseClickEvent.pos()
@@ -163,8 +182,9 @@ def force_update(state):
         force_all_bool = False
 
 def converge_all_to_e5():
-    pe_3._converge()
-    pe_2._converge()
+    pe._converge()
+    # pe_3._converge()
+    # pe_2._converge()
 
 plot.scene().sigMouseClicked.connect(set_goal)
 
@@ -202,10 +222,10 @@ layout = QtGui.QGridLayout()
 w.setLayout(layout)
 
 ## Add timer
-timer = QtCore.QTimer()
-timer.setInterval(50)
-timer.timeout.connect(update_plot_data)
-timer.start()
+# timer = QtCore.QTimer()
+# timer.setInterval(50)
+# timer.timeout.connect(update_plot_data)
+# timer.start()
 
 ## Add widgets to the layout in their proper positions
 layout.addWidget(connect, 0, 0)   # button goes in upper-left

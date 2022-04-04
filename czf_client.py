@@ -50,13 +50,18 @@ class ParamExample:
         random.seed()
         time.sleep(4)
 
+    def _estimator_reset(self):
+        self._cf.param.set_value('kalman.resetEstimation', '1')
+        time.sleep(0.5)
+        self._cf.param.set_value('kalman.resetEstimation', '0')
+
     def _take_off(self):
         self._cf.param.set_value('relative_ctrl.keepFlying', '1')
-        self._cf.param.set_value('relative_ctrl.force_land', '0')
+        # self._cf.param.set_value('relative_ctrl.force_land', '0')
 
     def _land(self):
         self._cf.param.set_value('relative_ctrl.keepFlying', '0')
-        self._cf.param.set_value('relative_ctrl.force_land', '1')
+        # self._cf.param.set_value('relative_ctrl.force_land', '1')
 
     def _force_wp(self,goal):
         self._cf.param.set_value('relative_ctrl.force_wp', '1')
@@ -65,7 +70,8 @@ class ParamExample:
         self.forcing_wp = True
     
     def _converge(self):
-        self._cf.param.set_value('relative_ctrl.converge', '1')
+        # self._cf.param.set_value('relative_ctrl.converge', '1')
+        self._cf.param.set_value('relative_ctrl.fakeGas', '1')
     
     def _dummy_to(self):
         self._cf.param.set_value('relative_ctrl.dummy_TO', '1')
